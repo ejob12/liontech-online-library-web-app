@@ -1,0 +1,2 @@
+Ronaldo added a file to trigger jenkins pipeline build
+jenkins to build only on master that is after a merge is done on master
