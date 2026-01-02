@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven-3'
+    }
+
+    environment {
+        IMAGE = "ejob12/liontech-java:${GIT_COMMIT}"
+        KUBECONFIG = credentials('kubeconfig-eks')
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/ejob12/liontech-online-library-web-app.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
+
+        stage('Publish to Nexus') {
+            steps {
+                sh 'mvn deploy'
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-creds',
+                    usernameVariable: 'U',
+                    passwordVariable: 'P'
+                )]) {
+                    sh '''
+                      docker login -u $U -p $P
+                      docker build -t $IMAGE .
+                      docker push $IMAGE
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to AWS EKS') {
+            steps {
+                sh '''
+                  kubectl config use-context arn:aws:eks:ca-central-1:303825583210:cluster/class26
+                  kubectl set image deployment/liontech liontech=$IMAGE
+                '''
+            }
+        }
+    }
+}
