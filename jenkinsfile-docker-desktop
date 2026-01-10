@@ -54,7 +54,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Docker Desktop Kubernetes') {
+        stage('Deploy Now To Docker Desktop Kubernetes') {
             steps {
                 sh '''
                   kubectl config use-context docker-desktop
