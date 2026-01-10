@@ -7,7 +7,8 @@ pipeline {
 
     environment {
         IMAGE = "ejob12/liontech-java:${BUILD_NUMBER}"
-        KUBECONFIG = credentials('kubeconfig-minikube')
+        // Use Docker Desktop kubeconfig instead of Minikube
+        KUBECONFIG = credentials('kubeconfig-docker-desktop')
     }
 
     stages {
@@ -23,19 +24,19 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv('SonarQube') {
+        //             sh 'mvn sonar:sonar'
+        //         }
+        //     }
+        // }
 
-        stage('Publish to Nexus') {
-            steps {
-                sh 'mvn deploy'
-            }
-        }
+        // stage('Publish to Nexus') {
+        //     steps {
+        //         sh 'mvn deploy'
+        //     }
+        // }
 
         stage('Docker Build & Push') {
             steps {
@@ -53,13 +54,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Minikube') {
+        stage('Deploy to Docker Desktop Kubernetes') {
             steps {
                 sh '''
-                  kubectl config use-context minikube
+                  kubectl config use-context docker-desktop
                   kubectl set image deployment/liontech liontech=$IMAGE
                 '''
             }
         }
     }
 }
+
