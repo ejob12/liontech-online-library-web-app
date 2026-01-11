@@ -5,6 +5,7 @@ WORKDIR /app
 # Copy project files
 COPY pom.xml .
 COPY src ./src
+COPY WebContent ./WebContent
 
 # Build the application, skipping tests
 RUN mvn clean package -DskipTests
@@ -13,11 +14,13 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-# Copy the built jar from the build stage
-COPY --from=build /app/target/*.jar app.jar
+# Copy the built WAR and webapp-runner
+COPY --from=build /app/target/onlinebookstore.war app.war
+COPY --from=build /app/target/dependency/webapp-runner.jar webapp-runner.jar
 
-# Expose application port (changed from 8080 to 9090)
+# Expose application port (changed to 9090)
 EXPOSE 9090
 
-# Run the application
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run the WAR using webapp-runner
+ENTRYPOINT ["java","-jar","webapp-runner.jar","--port","9090","app.war"]
+
