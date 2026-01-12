@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: liontech
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: library-web-app-config
+  namespace: liontech
+data:
+  APP_ENV: "production"
+  APP_NAME: "liontech-online-library-web-app"
+  SERVER_PORT: "9090"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: library-web-app
+  namespace: liontech
+  labels:
+    app: library-web-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: library-web-app
+  template:
+    metadata:
+      labels:
+        app: library-web-app
+    spec:
+      containers:
+        - name: library-web-app
+          image: liontech-online-library-web-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9090
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: library-web-app-config
+                  key: APP_ENV
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: library-web-app-config
+                  key: APP_NAME
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: library-web-app-config
+                  key: SERVER_PORT
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: library-web-app
+  namespace: liontech
+  labels:
+    app: library-web-app
+spec:
+  type: NodePort
+  selector:
+    app: library-web-app
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      nodePort: 30090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: library-web-app
+  namespace: liontech
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: library.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: library-web-app
+                port:
+                  number: 9090
