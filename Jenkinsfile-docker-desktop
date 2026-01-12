@@ -24,20 +24,6 @@ pipeline {
             }
         }
 
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv('SonarQube') {
-        //             sh 'mvn sonar:sonar'
-        //         }
-        //     }
-        // }
-
-        // stage('Publish to Nexus') {
-        //     steps {
-        //         sh 'mvn deploy'
-        //     }
-        // }
-
         stage('Docker Build & Push') {
             steps {
                 withCredentials([usernamePassword(
@@ -54,11 +40,13 @@ pipeline {
             }
         }
 
-        stage('Deploy To Docker Desktop Kubernetes') {
+        stage('Apply Kubernetes Deployment') {
             steps {
                 sh '''
                   kubectl config use-context docker-desktop
-                  kubectl set image deployment/liontech liontech=$IMAGE
+                  kubectl apply -f deployment.yml
+                  kubectl set image deployment/library-web-app library-web-app=$IMAGE -n liontech
+                  kubectl rollout status deployment/library-web-app -n liontech
                 '''
             }
         }
