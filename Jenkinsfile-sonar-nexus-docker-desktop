@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven-3.8.7'
+    }
+
+    environment {
+        IMAGE = "ejob12/liontech-java:${BUILD_NUMBER}"
+        // Use Docker Desktop kubeconfig instead of Minikube
+        KUBECONFIG = credentials('kubeconfig-docker-desktop')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/ejob12/liontech-online-library-web-app.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
+
+        stage('Publish to Nexus') {
+            steps {
+                sh 'mvn deploy'
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-creds',
+                    usernameVariable: 'U',
+                    passwordVariable: 'P'
+                )]) {
+                    sh '''
+                      echo $P | docker login -u $U --password-stdin
+                      docker build -t $IMAGE .
+                      docker push $IMAGE
+                    '''
+                }
+            }
+        }
+
+        stage('Apply Kubernetes Deployment') {
+            steps {
+                sh '''
+                  kubectl config use-context docker-desktop
+                  kubectl apply -f deployment.yml
+                  kubectl set image deployment/library-web-app library-web-app=$IMAGE -n liontech
+                  kubectl rollout status deployment/library-web-app -n liontech
+                '''
+            }
+        }
+    }
+}
