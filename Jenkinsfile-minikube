@@ -55,6 +55,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Deploy to Minikube') {
             steps {
                 sh '''
@@ -63,5 +64,6 @@ pipeline {
                 '''
             }
         }
+        */
     }
 }
