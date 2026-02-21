@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         IMAGE = "ejob12/liontech-java:${BUILD_NUMBER}"
-        KUBECONFIG = credentials('kubeconfig-minikube')
+        // KUBECONFIG = credentials('kubeconfig-minikube')
         DOCKER_REGISTRY = 'docker.io'
     }
 
