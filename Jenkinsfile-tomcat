@@ -36,7 +36,7 @@ pipeline {
             steps {
                 deploy adapters: [tomcat9(
                   credentialsId: 'tomcat-creds',
-                  url: 'http://<tomcat-ip>:8009'
+                  url: 'http://52.55.195.248:8009'
                 )],
                 war: 'target/*.war'
             }
