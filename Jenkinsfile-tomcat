@@ -35,12 +35,16 @@ pipeline {
         stage('Deploy to Tomcat') {
             steps {
                 deploy adapters: [tomcat9(
+                  alternativeDeploymentContext: '',
                   credentialsId: 'tomcat-creds',
+                  path: '',
                   url: 'http://52.55.195.248:8009'
                 )],
+                contextPath: 'online-bookstore-deployment',
                 war: 'target/*.war'
             }
         }
     }
 }
+
 
