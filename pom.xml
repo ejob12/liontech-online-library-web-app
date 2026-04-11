@@ -76,13 +76,13 @@
 	    <repository>
 	      <id>nexus</id>
 	      <name>LION TECH ACADEMY Releases Nexus Repository</name>
-	      <url>http://100.55.10.187:8081/repository/ejob-release/</url>
+	      <url>http://54.144.53.120:8081/repository/ejob-release/</url>
 	    </repository>
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>LION TECH ACADEMY Snapshot Nexus Repository </name>
-	      <url>http://100.55.10.187:8081/repository/ejob-snapshots/</url>
+	      <url>http://54.144.53.120:8081/repository/ejob-snapshots/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
@@ -92,9 +92,9 @@
 		<spring.version>5.1.2.RELEASE</spring.version>
 		<junit.version>4.11</junit.version>
 		<log4j.version>1.2.17</log4j.version>
-		<sonar.host.url>http://18.207.178.187:9000/</sonar.host.url>
+		<sonar.host.url>http://54.211.128.169:9000/</sonar.host.url>
 		<sonar.login>admin</sonar.login>  
-		<sonar.login>squ_358c2ff003c4b67fdee28f6e7852e446bcd34254</sonar.login>
+		<sonar.login>squ_478cfcee8cf11e47315da97e42d63551c7aaaf49</sonar.login>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
