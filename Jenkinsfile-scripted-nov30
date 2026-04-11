@@ -1,7 +1,7 @@
 node{
-  def mavenHome = tool name: 'maven3.9.8'
+  def mavenHome = tool name: 'maven3.8.7'
   stage('1cloneCode'){
-    git branch: 'nov29', url: 'https://github.com/Lion-Technology-Solutions/liontech-online-library-web-app.git'
+    git branch: 'master', url: 'https://github.com/Lion-Technology-Solutions/liontech-online-library-web-app.git'
   }
   stage('2Test&Build'){
     sh "${mavenHome}/bin/mvn install"
@@ -14,27 +14,27 @@ node{
     sh "${mavenHome}/bin/mvn  sonar:sonar"
   }
   stage('4uploadArtifacts'){
-    //sh "${mavenHome}/bin/mvn deploy"
-    //http://52.53.227.31:8191/liontech/repository/tesla-fe-snapshots/
-    //http://52.53.227.31:8191/liontech/repository/tesla-fe-releases/
+    sh "${mavenHome}/bin/mvn deploy"
+    http://54.144.53.120:8081/repository/ejob-snapshots/
+    http://54.144.53.120:8081/repository/ejob-release/
     // vi pom.xml and added repository details   
     // vi setting.xml and add AUTHENTICATION details  
   } 
   stage('deploy2dev'){
     sh "echo 'deploy to dev'  "
-    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'TOMCAT-DEPLOYER', path: '', url: 'http://35.182.68.230:8009/')], contextPath: 'dev', war: 'target/*.war'
+    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'dev', war: 'target/*.war'
 
   }
 
   stage('deploy2Test'){
     sh "echo 'deploy to Test'  "
-    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'TOMCAT-DEPLOYER', path: '', url: 'http://35.182.68.230:8009/')], contextPath: 'test', war: 'target/*.war'
+    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'test', war: 'target/*.war'
 
   }
 
   stage('5deploy2UAT'){
     sh "echo 'deploy to UAT'  "
-    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'TOMCAT-DEPLOYER', path: '', url: 'http://35.182.68.230:8009/')], contextPath: 'UAT', war: 'target/*.war'
+    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'UAT', war: 'target/*.war'
 
   }
   stage('6approvalGate'){
@@ -45,7 +45,7 @@ node{
   }
   stage('7deploy2Prod'){
     sh "sleep  50"
-    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'TOMCAT-DEPLOYER', path: '', url: 'http://35.182.68.230:8009/')], contextPath: 'PROD', war: 'target/*.war'
+    deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'PROD', war: 'target/*.war'
   }
 
   stage('congratulations') {
