@@ -38,7 +38,7 @@ pipeline {
                   alternativeDeploymentContext: '',
                   credentialsId: 'tomcat-creds',
                   path: '',
-                  url: 'http://52.55.195.248:8009'
+                  url: '98.81.166.55:8009'
                 )],
                 contextPath: 'online-bookstore-deployment',
                 war: 'target/*.war'
