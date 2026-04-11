@@ -1,68 +1,74 @@
-node{
+node {
   def mavenHome = tool name: 'maven3.8.7'
-  stage('1cloneCode'){
+
+  stage('1cloneCode') {
     git branch: 'master', url: 'https://github.com/Lion-Technology-Solutions/liontech-online-library-web-app.git'
   }
-  stage('2Test&Build'){
+
+  stage('2Test&Build') {
     sh "${mavenHome}/bin/mvn install"
     sh "${mavenHome}/bin/mvn test"
     sh "${mavenHome}/bin/mvn validate"
     sh "${mavenHome}/bin/mvn clean package"
-    //bat "${mavenHome}/bin/mvn clean package"
+    // bat "${mavenHome}/bin/mvn clean package"
   }
-  stage('3codeQuality'){
-    sh "${mavenHome}/bin/mvn  sonar:sonar"
+
+  stage('3codeQuality') {
+    sh "${mavenHome}/bin/mvn sonar:sonar"
   }
-  stage('4uploadArtifacts'){
+
+  stage('4uploadArtifacts') {
     sh "${mavenHome}/bin/mvn deploy"
-    http://54.144.53.120:8081/repository/ejob-snapshots/
-    http://54.144.53.120:8081/repository/ejob-release/
+    // Repository URLs (documented for reference, not executable)
+    echo "Snapshots Repo: http://54.144.53.120:8081/repository/ejob-snapshots/"
+    echo "Release Repo:   http://54.144.53.120:8081/repository/ejob-release/"
     // vi pom.xml and added repository details   
-    // vi setting.xml and add AUTHENTICATION details  
-  } 
-  stage('deploy2dev'){
-    sh "echo 'deploy to dev'  "
+    // vi settings.xml and add AUTHENTICATION details  
+  }
+
+  stage('deploy2dev') {
+    sh "echo 'deploy to dev'"
     deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'dev', war: 'target/*.war'
-
   }
 
-  stage('deploy2Test'){
-    sh "echo 'deploy to Test'  "
+  stage('deploy2Test') {
+    sh "echo 'deploy to Test'"
     deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'test', war: 'target/*.war'
-
   }
 
-  stage('5deploy2UAT'){
-    sh "echo 'deploy to UAT'  "
+  stage('5deploy2UAT') {
+    sh "echo 'deploy to UAT'"
     deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'UAT', war: 'target/*.war'
+  }
 
+  stage('6approvalGate') {
+    sh "echo 'ready for review'"
+    timeout(time: 5, unit: 'DAYS') {
+      input message: 'Application ready for deployment, Please review and approve'
+    }
   }
-  stage('6approvalGate'){
-    sh "echo 'ready for review' "
-    timeout(time:5, unit:'DAYS') {
-    input message: 'Application ready for deployment, Please review and approve'
-      }
-  }
-  stage('7deploy2Prod'){
-    sh "sleep  50"
+
+  stage('7deploy2Prod') {
+    sh "sleep 50"
     deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat-creds', path: '', url: 'http://98.81.166.55:8009/')], contextPath: 'PROD', war: 'target/*.war'
   }
 
   stage('congratulations') {
-
-    echo 'congratulations  Lion Tech Engineers'
+    echo 'congratulations Lion Tech Engineers'
   }
 
-//   stage ('send MS Teams Notifications'){
+  // stage ('send MS Teams Notifications') {
+  //   slackSend channel: 'https://automation--jenkins.slack.com/customize/icon', message: 'check build status'
+  // }
 
-//    slackSend channel: 'https://automation--jenkins.slack.com/customize/icon', message: 'check build status'
-//   }
-            
-  stage('8emailNotification'){
+  stage('8emailNotification') {
     emailext body: '''Hi All,
 
 Check Build status.
 
-Lion Techologies''', recipientProviders: [buildUser(), developers(), upstreamDevelopers(), brokenBuildSuspects(), brokenTestsSuspects(), contributor()], subject: 'build status', to: 'info@liontechacademy.com'
+Lion Technologies''',
+    recipientProviders: [buildUser(), developers(), upstreamDevelopers(), brokenBuildSuspects(), brokenTestsSuspects(), contributor()],
+    subject: 'build status',
+    to: 'info@liontechacademy.com'
   }
 }
