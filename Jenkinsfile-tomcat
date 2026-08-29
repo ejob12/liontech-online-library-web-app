@@ -21,15 +21,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    // Run SonarQube analysis via Maven plugin
-                    sh '''
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=online-library-web-app \
-                          -Dsonar.sources=src \
-                          -Dsonar.java.binaries=target/classes \
-                          -Dsonar.host.url=http://<your-sonarqube-server>:9000 \
-                          -Dsonar.login=<your-sonarqube-token>
-                    '''
+                    // Single-line Maven command avoids newline parsing errors
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=online-library-web-app -Dsonar.sources=src -Dsonar.java.binaries=target/classes -Dsonar.host.url=http://<your-sonarqube-server>:9000 -Dsonar.login=<your-sonarqube-token>'
                 }
             }
         }
@@ -54,6 +47,7 @@ pipeline {
         }
     }
 }
+
 
 
 
