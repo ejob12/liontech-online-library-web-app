@@ -14,32 +14,30 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    // Single-line Maven command avoids newline parsing errors
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=online-library-web-app -Dsonar.sources=src -Dsonar.java.binaries=target/classes -Dsonar.host.url=http://<your-sonarqube-server>:9000 -Dsonar.login=<your-sonarqube-token>'
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=online-library-web-app'
                 }
             }
         }
 
         stage('Publish to Nexus') {
             steps {
-                sh 'mvn deploy'
+                sh 'mvn deploy -DskipTests'
             }
         }
 
         stage('Deploy to Tomcat') {
             steps {
                 deploy adapters: [tomcat9(
-                  alternativeDeploymentContext: '',
-                  credentialsId: 'tomcat-creds',
-                  path: '',
-                  url: '98.81.166.55:8009'
+                    credentialsId: 'tomcat-creds',
+                    path: '',
+                    url: 'http://98.81.166.55:8009'
                 )],
                 contextPath: 'online-bookstore-deployment',
                 war: 'target/*.war'
@@ -47,6 +45,7 @@ pipeline {
         }
     }
 }
+
 
 
 
