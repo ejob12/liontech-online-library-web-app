@@ -1,0 +1,82 @@
+This file states the steps to follow to run this pipeline successfully
+
+Jenkins-Maven Integration:
+First install the maven plugin 
+Then use any option below:
+Option 1: Configure via Jenkins UI (Recommended)
+Go to Manage Jenkins → Tools
+Scroll to Maven installations
+Click Add Maven
+Set:
+Name: maven-3.9.12
+Check Install automatically
+Select version 3.9.12
+Click Save
+This is what the tools { maven 'maven-3.9.12' } block in your Jenkinsfile expects.
+
+Option 2: Install Maven manually inside the container or server:
+# Enter the container
+docker exec -it jenkins /bin/bash
+
+# Install Maven 3.9.12
+cd /opt
+curl -O https://dlcdn.apache.org/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz
+tar -xzf apache-maven-3.9.12-bin.tar.gz
+ln -s apache-maven-3.9.12 maven
+
+# Add to PATH
+echo 'export PATH=/opt/maven/bin:$PATH' >> /etc/profile
+source /etc/profile
+
+# Verify
+mvn --version
+
+⚠️ Important: Even after manual installation, you still need to register it in Jenkins:
+
+Manage Jenkins → Tools → Maven installations → Add Maven
+
+Name: maven-3.9.12
+MAVEN_HOME: /opt/maven
+Uncheck "Install automatically"
+
+N/B : option 1 above is better
+
+Jenkins-Sonarqube Integration:
+
+Create a token in Sonarqube
+In the pom.xml file, edit the following:
+sonar.host.url:
+sonar.login: input token here
+
+Then: go to Jenkins GUI
+Manage Jenkins → System → SonarQube servers
+  Name: SonarQube          ← must match withSonarQubeEnv('SonarQube')
+  Server URL: http://<sonarqube-ip>:9000
+  Token: <your-token>
+
+  For Jenkins-Nexus Integration:
+  Create two repositories, go to nexus and click on settings, then click on repositories, after creating 
+  Release and Snapshots repos, input in the pom.xml file at line 89, 94
+  Then open the jenkins server and edit the settings.xml file
+  or in this architecture, jenkins is running as a docker container, so use the following steps: 
+
+  docker exec -it jenkins /bin/bash
+mkdir -p /var/jenkins_home/.m2
+cat > /var/jenkins_home/.m2/settings.xml << 'EOF'
+<settings>
+  <servers>
+    <server>
+      <id>online-release</id>
+      <username>admin</username>
+      <password>Cadrecontractuel@12</password>
+    </server>
+    <server>
+      <id>online-snapshots</id>
+      <username>admin</username>
+      <password>Cadrecontractuel@12</password>
+    </server>
+  </servers>
+</settings>
+EOF
+
+

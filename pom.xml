@@ -86,12 +86,12 @@
         <repository>
             <id>nexus</id>
             <name>LION TECH ACADEMY Releases Nexus Repository</name>
-            <url>http://54.144.53.120:8081/repository/ejob-release/</url>
+            <url>http://32.199.200.151:8081/repository/online-release/</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>LION TECH ACADEMY Snapshot Nexus Repository</name>
-            <url>http://54.144.53.120:8081/repository/ejob-snapshots/</url>
+            <url>http://32.199.200.151:8081/repository/online-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
